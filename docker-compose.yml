@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+
+  admin-assistant:
+    image: admin-assistant:0.0.1-SNAPSHOT
+    build:
+      context: .
+    container_name: admin-assistant
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/assistant
+      SPRING_DATASOURCE_PASSWORD: password
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+
+  db:
+    image: postgres:latest
+    container_name: assistant_db
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: assistant
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  db-data:
+    driver: local
