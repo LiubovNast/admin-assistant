@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -22,9 +23,12 @@ import javax.annotation.PostConstruct;
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final AdminRepository adminRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public SecurityConfiguration(AdminRepository adminRepository) {
+
+    public SecurityConfiguration(AdminRepository adminRepository, PasswordEncoder passwordEncoder) {
         this.adminRepository = adminRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -49,7 +53,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.DELETE, RootPath.ADMIN).hasRole("OWNER")
                 .antMatchers(HttpMethod.GET, RootPath.ADMIN).hasAnyRole(Role.ROLE_OWNER.name(), Role.ROLE_ADMIN.name())
 
-                .anyRequest().authenticated()
+                //.anyRequest().authenticated()
                 .and()
                 // auth filter
 //                .addFilter(jwtAuthenticationFilter())
@@ -58,7 +62,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 // for unauthorized requests return 401
 //                .exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
 //                .and()
-                // allow cross-origin requests for all endpoints
+
                 .cors().configurationSource(corsConfigurationSource())
                 .and()
                 .csrf().disable()
@@ -77,7 +81,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             admin = new Admin();
             admin.setFullName("Main Owner");
             admin.setLogin("owner");
-            admin.setPassword("$2a$10$x7GWfaK5zX2w/O.SMGqqUe5Afp4B/nAyblne5ASMlmSWY70a/yXRm");
+            admin.setPassword(passwordEncoder.encode("owner"));
             admin.setRole(Role.valueOf("ROLE_OWNER"));
             adminRepository.save(admin);
         }
