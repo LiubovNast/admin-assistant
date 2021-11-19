@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -24,16 +25,20 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
 
-    public SecurityConfiguration(AdminRepository adminRepository, PasswordEncoder passwordEncoder) {
+    public SecurityConfiguration(AdminRepository adminRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
         this.adminRepository = adminRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
+        http
+                .csrf().disable()
+                .authorizeRequests()
                 // open static resources
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 // open swagger-ui
@@ -55,17 +60,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 //.anyRequest().authenticated()
                 .and()
+                .apply(new JwtConfig(jwtTokenProvider))
+
                 // auth filter
 //                .addFilter(jwtAuthenticationFilter())
 //                // jwt-verification filter
 //                .addFilter(jwtAuthorizationFilter())
                 // for unauthorized requests return 401
 //                .exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-//                .and()
-
+                .and()
                 .cors().configurationSource(corsConfigurationSource())
                 .and()
-                .csrf().disable()
                 // this disables session creation on Spring Security
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
