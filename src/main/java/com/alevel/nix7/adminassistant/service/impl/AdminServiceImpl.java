@@ -7,16 +7,15 @@ import com.alevel.nix7.adminassistant.model.admin.AdminSaveRequest;
 import com.alevel.nix7.adminassistant.repository.AdminRepository;
 import com.alevel.nix7.adminassistant.service.AdminService;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-public class AdminServiceImpl implements UserDetailsService, AdminService {
+public class AdminServiceImpl implements AdminService {
 
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
@@ -42,13 +41,19 @@ public class AdminServiceImpl implements UserDetailsService, AdminService {
     }
 
     @Override
+    public AdminResponse getByLogin(String login) {
+        Admin admin = adminRepository.findAdminByLogin(login);
+        return admin == null ? null : AdminResponse.fromAdmin(admin);
+    }
+
+    @Override
     public void delete(Long id) {
         adminRepository.deleteById(id);
     }
 
     @Override
     public List<AdminResponse> getAllAdmins() {
-        return new ArrayList<>();
+        return adminRepository.findAll().stream().map(AdminResponse::fromAdmin).collect(Collectors.toList());
     }
 
     private Admin save(AdminSaveRequest request) {
@@ -56,6 +61,7 @@ public class AdminServiceImpl implements UserDetailsService, AdminService {
         admin.setPassword(passwordEncoder.encode(request.password()));
         admin.setFullName(request.fullName());
         admin.setLogin(request.login());
+        admin.setRole(request.role());
         adminRepository.save(admin);
         return admin;
     }

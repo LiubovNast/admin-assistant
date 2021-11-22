@@ -29,6 +29,14 @@ public class User {
     @Enumerated(EnumType.ORDINAL)
     private Role role = Role.ROLE_USER;
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     public String getFullName() {
         return fullName;
     }

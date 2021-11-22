@@ -1,6 +1,7 @@
 package com.alevel.nix7.adminassistant.service;
 
 import com.alevel.nix7.adminassistant.model.procedure.Procedure;
+import com.alevel.nix7.adminassistant.model.procedure.ProcedureResponse;
 
 import java.util.List;
 
@@ -10,7 +11,9 @@ public interface ProcedureService {
 
     void delete(Long id);
 
-    Procedure getById(Long id);
+    ProcedureResponse getById(Long id);
 
-    List<Procedure> getAll();
+    List<ProcedureResponse> findAll();
+
+    List<ProcedureResponse> findAllBySpecialist(Long id);
 }

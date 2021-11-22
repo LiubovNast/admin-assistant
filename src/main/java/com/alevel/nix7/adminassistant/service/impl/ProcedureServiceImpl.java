@@ -1,11 +1,13 @@
 package com.alevel.nix7.adminassistant.service.impl;
 
 import com.alevel.nix7.adminassistant.model.procedure.Procedure;
+import com.alevel.nix7.adminassistant.model.procedure.ProcedureResponse;
 import com.alevel.nix7.adminassistant.repository.ProcedureRepository;
 import com.alevel.nix7.adminassistant.service.ProcedureService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProcedureServiceImpl implements ProcedureService {
@@ -27,12 +29,21 @@ public class ProcedureServiceImpl implements ProcedureService {
     }
 
     @Override
-    public Procedure getById(Long id) {
-        return procedureRepository.getById(id);
+    public ProcedureResponse getById(Long id) {
+        return ProcedureResponse.fromProcedure(procedureRepository.getById(id));
     }
 
     @Override
-    public List<Procedure> getAll() {
-        return procedureRepository.findAll();
+    public List<ProcedureResponse> findAllBySpecialist(Long id) {
+        return procedureRepository.findAllBySpecialists(id).stream()
+                .map(ProcedureResponse::fromProcedure)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProcedureResponse> findAll() {
+        return procedureRepository.findAll().stream()
+                .map(ProcedureResponse::fromProcedure)
+                .collect(Collectors.toList());
     }
 }

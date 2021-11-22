@@ -1,49 +1,64 @@
 package com.alevel.nix7.adminassistant.config.security;
 
 import com.alevel.nix7.adminassistant.RootPath;
+import com.alevel.nix7.adminassistant.config.security.filter.JwtAuthenticationFilter;
+import com.alevel.nix7.adminassistant.config.security.filter.JwtAuthorizationFilter;
 import com.alevel.nix7.adminassistant.model.Role;
-import com.alevel.nix7.adminassistant.model.admin.Admin;
-import com.alevel.nix7.adminassistant.repository.AdminRepository;
+import com.alevel.nix7.adminassistant.model.admin.AdminSaveRequest;
+import com.alevel.nix7.adminassistant.service.AdminService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.Filter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private final AdminRepository adminRepository;
+    private final String OWNER = "OWNER";
+
+    private final AdminService adminService;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtComponent jwtComponent;
+    private final ObjectMapper objectMapper;
 
 
-    public SecurityConfiguration(AdminRepository adminRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
-        this.adminRepository = adminRepository;
+    public SecurityConfiguration(AdminService adminService, PasswordEncoder passwordEncoder,
+                                 JwtComponent jwtComponent, ObjectMapper objectMapper) {
+        this.adminService = adminService;
         this.passwordEncoder = passwordEncoder;
-        this.jwtTokenProvider = jwtTokenProvider;
+        this.jwtComponent = jwtComponent;
+        this.objectMapper = objectMapper;
+    }
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(adminService).passwordEncoder(passwordEncoder);
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-                .csrf().disable()
-                .authorizeRequests()
+        http.authorizeRequests()
                 // open static resources
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 // open swagger-ui
                 .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                .antMatchers(RootPath.ROOT).permitAll()
+                .antMatchers(HttpMethod.POST, RootPath.ROOT).permitAll()
 
                 .antMatchers(HttpMethod.GET, RootPath.USER)
                 .hasAnyRole(Role.ROLE_ADMIN.name(), Role.ROLE_OWNER.name(), Role.ROLE_WORKER.name(), Role.ROLE_USER.name())
@@ -54,25 +69,33 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, RootPath.WORKER).hasAnyRole(Role.ROLE_ADMIN.name(), Role.ROLE_OWNER.name(), Role.ROLE_WORKER.name())
                 .antMatchers(HttpMethod.DELETE, RootPath.WORKER).hasAnyRole(Role.ROLE_ADMIN.name(), Role.ROLE_OWNER.name())
 
-                .antMatchers(HttpMethod.POST, RootPath.ADMIN).hasRole("OWNER")
-                .antMatchers(HttpMethod.DELETE, RootPath.ADMIN).hasRole("OWNER")
-                .antMatchers(HttpMethod.GET, RootPath.ADMIN).hasAnyRole(Role.ROLE_OWNER.name(), Role.ROLE_ADMIN.name())
+                .antMatchers(HttpMethod.POST, RootPath.ADMIN).hasAuthority(OWNER)
+                .antMatchers(HttpMethod.DELETE, RootPath.ADMIN).hasRole(OWNER)
+                .antMatchers(HttpMethod.GET, RootPath.ADMIN).hasAnyRole(OWNER, "ADMIN")
 
-                //.anyRequest().authenticated()
+                .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole(OWNER)
+
+                .anyRequest().authenticated()
                 .and()
-                .apply(new JwtConfig(jwtTokenProvider))
-
-                // auth filter
-//                .addFilter(jwtAuthenticationFilter())
-//                // jwt-verification filter
-//                .addFilter(jwtAuthorizationFilter())
-                // for unauthorized requests return 401
-//                .exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                .addFilter(jwtAuthenticationFilter())
+                .addFilter(jwtAuthorizationFilter())
+                .exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 .and()
                 .cors().configurationSource(corsConfigurationSource())
                 .and()
-                // this disables session creation on Spring Security
+                .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    }
+
+    private Filter jwtAuthorizationFilter() throws Exception {
+        return new JwtAuthorizationFilter(authenticationManager(), jwtComponent);
+
+    }
+
+    private Filter jwtAuthenticationFilter() throws Exception {
+        var filter = new JwtAuthenticationFilter(authenticationManager(), objectMapper);
+        filter.setFilterProcessesUrl(RootPath.ROOT);
+        return filter;
     }
 
     @PostConstruct
@@ -81,14 +104,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     private void setupDefaultAdmin() {
-        Admin admin = adminRepository.findAdminByLogin("owner");
-        if (admin == null) {
-            admin = new Admin();
-            admin.setFullName("Main Owner");
-            admin.setLogin("owner");
-            admin.setPassword(passwordEncoder.encode("owner"));
-            admin.setRole(Role.valueOf("ROLE_OWNER"));
-            adminRepository.save(admin);
+        if (adminService.getByLogin("owner") == null) {
+            adminService.create(new AdminSaveRequest("Main Owner",
+                    passwordEncoder.encode("owner"),
+                    "owner",
+                    Role.ROLE_OWNER));
         }
     }
 

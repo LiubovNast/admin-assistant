@@ -1,6 +1,8 @@
 package com.alevel.nix7.adminassistant.service.impl;
 
 import com.alevel.nix7.adminassistant.model.user.User;
+import com.alevel.nix7.adminassistant.model.user.UserRequest;
+import com.alevel.nix7.adminassistant.model.user.UserResponse;
 import com.alevel.nix7.adminassistant.repository.UserRepository;
 import com.alevel.nix7.adminassistant.service.UserService;
 import org.springframework.stereotype.Service;
@@ -15,13 +17,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void create(User user) {
-        userRepository.save(user);
+    public UserResponse create(UserRequest user) {
+        return saveUser(user);
     }
 
-    @Override
-    public void update(User user) {
-        userRepository.save(user);
+    private UserResponse saveUser(UserRequest user) {
+        User newUser = new User();
+        newUser.setFullName(user.fullName());
+        newUser.setPhone(user.phone());
+        newUser.setRole(user.role());
+        userRepository.save(newUser);
+        return UserResponse.fromUser(newUser);
     }
 
     @Override
