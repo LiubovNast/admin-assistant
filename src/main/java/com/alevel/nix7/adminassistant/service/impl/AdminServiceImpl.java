@@ -7,6 +7,8 @@ import com.alevel.nix7.adminassistant.model.admin.AdminResponse;
 import com.alevel.nix7.adminassistant.model.admin.AdminSaveRequest;
 import com.alevel.nix7.adminassistant.repository.AdminRepository;
 import com.alevel.nix7.adminassistant.service.AdminService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,6 +21,8 @@ import java.util.stream.Collectors;
 @Service
 public class AdminServiceImpl implements AdminService, UserDetailsService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(AdminServiceImpl.class);
+
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -29,11 +33,13 @@ public class AdminServiceImpl implements AdminService, UserDetailsService {
 
     @Override
     public AdminResponse create(AdminSaveRequest admin) {
+        LOG.info("Create new Admin {}", admin.fullName());
         return AdminResponse.fromAdmin(save(admin, Role.ROLE_ADMIN));
     }
 
     @Override
     public AdminResponse createOwner(AdminSaveRequest admin) {
+        LOG.info("Create new Owner {}", admin.fullName());
         return AdminResponse.fromAdmin(save(admin, Role.ROLE_OWNER));
     }
 

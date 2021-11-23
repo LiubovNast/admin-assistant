@@ -8,6 +8,8 @@ import com.alevel.nix7.adminassistant.model.admin.AdminSaveRequest;
 import com.alevel.nix7.adminassistant.service.AdminService;
 import com.alevel.nix7.adminassistant.service.impl.AdminServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +32,8 @@ import javax.servlet.Filter;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SecurityConfiguration.class);
 
     private final String OWNER = "OWNER";
 
@@ -107,6 +111,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             adminService.createOwner(new AdminSaveRequest("Main Owner",
                     passwordEncoder.encode("owner"),
                     "owner"));
+            LOG.info("Create default owner");
         }
     }
 

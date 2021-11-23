@@ -8,6 +8,8 @@ import com.alevel.nix7.adminassistant.model.specialist.Specialist;
 import com.alevel.nix7.adminassistant.model.user.User;
 import com.alevel.nix7.adminassistant.repository.ProcedureRepository;
 import com.alevel.nix7.adminassistant.repository.RecordRepository;
+import com.alevel.nix7.adminassistant.repository.SpecialistRepository;
+import com.alevel.nix7.adminassistant.repository.UserRepository;
 import com.alevel.nix7.adminassistant.service.ProcedureService;
 import com.alevel.nix7.adminassistant.service.RecordService;
 import com.alevel.nix7.adminassistant.service.SpecialistService;
@@ -23,16 +25,20 @@ public class RecordServiceImpl implements RecordService {
 
     private final RecordRepository recordRepository;
     private final UserService userService;
+    private final UserRepository userRepository;
     private final SpecialistService specialistService;
+    private final SpecialistRepository specialistRepository;
     private final ProcedureService procedureService;
     private final ProcedureRepository procedureRepository;
 
     public RecordServiceImpl(RecordRepository recordRepository, UserService userService,
-                             SpecialistService specialistService, ProcedureService procedureService,
+                             UserRepository userRepository, SpecialistService specialistService, SpecialistRepository specialistRepository, ProcedureService procedureService,
                              ProcedureRepository procedureRepository) {
         this.recordRepository = recordRepository;
         this.userService = userService;
+        this.userRepository = userRepository;
         this.specialistService = specialistService;
+        this.specialistRepository = specialistRepository;
         this.procedureService = procedureService;
         this.procedureRepository = procedureRepository;
     }
@@ -63,18 +69,18 @@ public class RecordServiceImpl implements RecordService {
 
     @Override
     public List<RecordResponse> getRecordsBySpecialist(Long id) {
-        return recordRepository.findRecordsBySpecialist(id).stream()
+        return recordRepository.findRecordsBySpecialist(specialistRepository.getById(id)).stream()
                 .map(RecordResponse::fromRecord).collect(Collectors.toList());
     }
 
     @Override
     public List<Record> getRecordsByUser(Long id) {
-        return recordRepository.findRecordsByUser(id);
+        return recordRepository.findRecordsByUser(userRepository.getById(id));
     }
 
     @Override
     public List<RecordResponse> getRecordsForSpecialistBetweenTime(Long specialistId, Timestamp from, Timestamp to) {
-        return recordRepository.findRecordsBySpecialistAndWhenBetween(specialistId, from, to)
+        return recordRepository.findRecordsBySpecialistAndWhenBetween(specialistRepository.getById(specialistId), from, to)
                 .stream().map(RecordResponse::fromRecord)
                 .collect(Collectors.toList());
     }

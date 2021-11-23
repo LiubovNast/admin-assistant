@@ -49,7 +49,7 @@ public class FreeTimeServiceImpl implements FreeTimeService {
 
     @Override
     public List<FreeTimeResponse> getAllFreeTimeSpecialist(Long id) {
-        return freeTimeRepository.findFreeTimesBySpecialistIn(id)
+        return freeTimeRepository.findAllBySpecialist(specialistRepository.getById(id))
                 .stream().map(FreeTimeResponse::fromTime)
                 .collect(Collectors.toList());
     }
