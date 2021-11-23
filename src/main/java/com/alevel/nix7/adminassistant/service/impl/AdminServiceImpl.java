@@ -1,5 +1,6 @@
 package com.alevel.nix7.adminassistant.service.impl;
 
+import com.alevel.nix7.adminassistant.model.Role;
 import com.alevel.nix7.adminassistant.model.admin.Admin;
 import com.alevel.nix7.adminassistant.model.admin.AdminDetails;
 import com.alevel.nix7.adminassistant.model.admin.AdminResponse;
@@ -7,6 +8,7 @@ import com.alevel.nix7.adminassistant.model.admin.AdminSaveRequest;
 import com.alevel.nix7.adminassistant.repository.AdminRepository;
 import com.alevel.nix7.adminassistant.service.AdminService;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class AdminServiceImpl implements AdminService {
+public class AdminServiceImpl implements AdminService, UserDetailsService {
 
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
@@ -27,12 +29,12 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public AdminResponse create(AdminSaveRequest admin) {
-        return AdminResponse.fromAdmin(save(admin));
+        return AdminResponse.fromAdmin(save(admin, Role.ROLE_ADMIN));
     }
 
     @Override
-    public void update(Admin admin) {
-        adminRepository.save(admin);
+    public AdminResponse createOwner(AdminSaveRequest admin) {
+        return AdminResponse.fromAdmin(save(admin, Role.ROLE_OWNER));
     }
 
     @Override
@@ -56,12 +58,12 @@ public class AdminServiceImpl implements AdminService {
         return adminRepository.findAll().stream().map(AdminResponse::fromAdmin).collect(Collectors.toList());
     }
 
-    private Admin save(AdminSaveRequest request) {
+    private Admin save(AdminSaveRequest request, Role role) {
         var admin = new Admin();
         admin.setPassword(passwordEncoder.encode(request.password()));
         admin.setFullName(request.fullName());
         admin.setLogin(request.login());
-        admin.setRole(request.role());
+        admin.setRole(role);
         adminRepository.save(admin);
         return admin;
     }

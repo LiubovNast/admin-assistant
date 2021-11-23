@@ -1,5 +1,6 @@
 package com.alevel.nix7.adminassistant.service.impl;
 
+import com.alevel.nix7.adminassistant.model.Role;
 import com.alevel.nix7.adminassistant.model.user.User;
 import com.alevel.nix7.adminassistant.model.user.UserRequest;
 import com.alevel.nix7.adminassistant.model.user.UserResponse;
@@ -25,7 +26,7 @@ public class UserServiceImpl implements UserService {
         User newUser = new User();
         newUser.setFullName(user.fullName());
         newUser.setPhone(user.phone());
-        newUser.setRole(user.role());
+        newUser.setRole(Role.ROLE_USER);
         userRepository.save(newUser);
         return UserResponse.fromUser(newUser);
     }

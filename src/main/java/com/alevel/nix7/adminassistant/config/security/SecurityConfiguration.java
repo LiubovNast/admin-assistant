@@ -6,6 +6,7 @@ import com.alevel.nix7.adminassistant.config.security.filter.JwtAuthorizationFil
 import com.alevel.nix7.adminassistant.model.Role;
 import com.alevel.nix7.adminassistant.model.admin.AdminSaveRequest;
 import com.alevel.nix7.adminassistant.service.AdminService;
+import com.alevel.nix7.adminassistant.service.impl.AdminServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -32,13 +33,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final String OWNER = "OWNER";
 
-    private final AdminService adminService;
+    private final AdminServiceImpl adminService;
     private final PasswordEncoder passwordEncoder;
     private final JwtComponent jwtComponent;
     private final ObjectMapper objectMapper;
 
 
-    public SecurityConfiguration(AdminService adminService, PasswordEncoder passwordEncoder,
+    public SecurityConfiguration(AdminServiceImpl adminService, PasswordEncoder passwordEncoder,
                                  JwtComponent jwtComponent, ObjectMapper objectMapper) {
         this.adminService = adminService;
         this.passwordEncoder = passwordEncoder;
@@ -58,27 +59,26 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 // open swagger-ui
                 .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                .antMatchers(HttpMethod.POST, RootPath.ROOT).permitAll()
+                .antMatchers(RootPath.ROOT, RootPath.ROOT + "/**").permitAll()
+                //.antMatchers(HttpMethod.POST, RootPath.ROOT).permitAll()
 
-                .antMatchers(HttpMethod.GET, RootPath.USER)
-                .hasAnyRole(Role.ROLE_ADMIN.name(), Role.ROLE_OWNER.name(), Role.ROLE_WORKER.name(), Role.ROLE_USER.name())
-                .antMatchers(HttpMethod.POST, RootPath.USER)
-                .hasAnyRole(Role.ROLE_ADMIN.name(), Role.ROLE_OWNER.name(), Role.ROLE_WORKER.name(), Role.ROLE_USER.name())
+//                .antMatchers(HttpMethod.POST, RootPath.WORKER, RootPath.WORKER + "/**").hasAnyRole("ADMIN", "OWNER", "WORKER")
+//                .antMatchers(HttpMethod.GET, RootPath.WORKER, RootPath.WORKER + "/**").hasAnyRole("ADMIN", "OWNER", "WORKER")
+//                .antMatchers(HttpMethod.DELETE, RootPath.WORKER).hasAnyRole("ADMIN", "OWNER")
+//
+//                .antMatchers(HttpMethod.POST, RootPath.ADMIN).hasRole(OWNER)
+//                .antMatchers(HttpMethod.DELETE, RootPath.ADMIN).hasRole(OWNER)
+//                .antMatchers(HttpMethod.GET, RootPath.ADMIN).hasAnyRole(OWNER, "ADMIN")
+//
+//                .antMatchers(HttpMethod.GET, RootPath.USER).authenticated()
+//                .antMatchers(HttpMethod.POST, RootPath.USER).authenticated()
+//
+//                .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole(OWNER)
 
-                .antMatchers(HttpMethod.POST, RootPath.WORKER).hasAnyRole(Role.ROLE_ADMIN.name(), Role.ROLE_OWNER.name(), Role.ROLE_WORKER.name())
-                .antMatchers(HttpMethod.GET, RootPath.WORKER).hasAnyRole(Role.ROLE_ADMIN.name(), Role.ROLE_OWNER.name(), Role.ROLE_WORKER.name())
-                .antMatchers(HttpMethod.DELETE, RootPath.WORKER).hasAnyRole(Role.ROLE_ADMIN.name(), Role.ROLE_OWNER.name())
-
-                .antMatchers(HttpMethod.POST, RootPath.ADMIN).hasAuthority(OWNER)
-                .antMatchers(HttpMethod.DELETE, RootPath.ADMIN).hasRole(OWNER)
-                .antMatchers(HttpMethod.GET, RootPath.ADMIN).hasAnyRole(OWNER, "ADMIN")
-
-                .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole(OWNER)
-
-                .anyRequest().authenticated()
+               // .anyRequest().authenticated()
                 .and()
-                .addFilter(jwtAuthenticationFilter())
-                .addFilter(jwtAuthorizationFilter())
+//                .addFilter(jwtAuthenticationFilter())
+//                .addFilter(jwtAuthorizationFilter())
                 .exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 .and()
                 .cors().configurationSource(corsConfigurationSource())
@@ -89,7 +89,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private Filter jwtAuthorizationFilter() throws Exception {
         return new JwtAuthorizationFilter(authenticationManager(), jwtComponent);
-
     }
 
     private Filter jwtAuthenticationFilter() throws Exception {
@@ -105,10 +104,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private void setupDefaultAdmin() {
         if (adminService.getByLogin("owner") == null) {
-            adminService.create(new AdminSaveRequest("Main Owner",
+            adminService.createOwner(new AdminSaveRequest("Main Owner",
                     passwordEncoder.encode("owner"),
-                    "owner",
-                    Role.ROLE_OWNER));
+                    "owner"));
         }
     }
 

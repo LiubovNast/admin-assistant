@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface FreeTimeRepository extends JpaRepository<FreeTime, Long> {
 
-    List<FreeTime> findFreeTimesBySpecialist(Long id);
+    List<FreeTime> findFreeTimesBySpecialistIn(Long id);
 }

@@ -36,15 +36,15 @@ class AdminAssistantApplicationTests {
         String password = "password";
         String fullName = "Full Name";
 
-        ResponseEntity<AdminResponse> adminResponseEntity = createAdmin(fullName, password, login, Role.ROLE_ADMIN);
+        ResponseEntity<AdminResponse> adminResponseEntity = createAdmin(fullName, password, login);
 
-       // assertEquals(MediaType.APPLICATION_JSON, adminResponseEntity.getHeaders().getContentType());
+       assertEquals(MediaType.APPLICATION_JSON, adminResponseEntity.getHeaders().getContentType());
 
     }
 
-    private ResponseEntity<AdminResponse> createAdmin(String fullName, String password, String login, Role role) {
+    private ResponseEntity<AdminResponse> createAdmin(String fullName, String password, String login) {
         String url = "http://localhost:" + port + "/admin";
-        AdminSaveRequest request = new AdminSaveRequest(fullName, password, login, role);
+        AdminSaveRequest request = new AdminSaveRequest(fullName, password, login);
         return rest.postForEntity(url, request, AdminResponse.class);
     }
 }

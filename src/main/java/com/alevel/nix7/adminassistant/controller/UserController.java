@@ -46,4 +46,16 @@ public class UserController {
     public UserResponse user(@RequestBody String phone) {
         return UserResponse.fromUser(userService.getByPhone(phone));
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUserById(@PathVariable long id) {
+        userService.delete(id);
+    }
+
+    @DeleteMapping("/records/{idRecord}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteRecordById(@PathVariable Long idRecord) {
+        recordService.delete(idRecord);
+    }
 }

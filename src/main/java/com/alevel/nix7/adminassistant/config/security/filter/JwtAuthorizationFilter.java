@@ -68,10 +68,10 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             return null;
         }
 
-        String email = decodedJWT.getSubject();
+        var login = decodedJWT.getSubject();
 
-        Set<GrantedAuthority> authorities = Set.of(decodedJWT.getClaim("role").as(Role.class));
+        var authorities = decodedJWT.getClaim("role").as(GrantedAuthority.class);
 
-        return new UsernamePasswordAuthenticationToken(email, null, authorities);
+        return new UsernamePasswordAuthenticationToken(login, null, Set.of(authorities));
     }
 }

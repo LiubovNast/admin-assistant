@@ -26,6 +26,12 @@ public class AdminController {
         return adminService.create(request);
     }
 
+    @PostMapping("/owner")
+    @ResponseStatus(HttpStatus.CREATED)
+    public AdminResponse registerOwner(@RequestBody @Valid AdminSaveRequest request) {
+        return adminService.createOwner(request);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAdminById(@PathVariable long id) {

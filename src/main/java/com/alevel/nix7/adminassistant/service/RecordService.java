@@ -17,5 +17,5 @@ public interface RecordService {
 
     List<Record> getRecordsByUser(Long id);
 
-    List<Record> getRecordsBetweenTime(Timestamp from, Timestamp to);
+    List<RecordResponse> getRecordsForSpecialistBetweenTime(Long specialistId, Timestamp from, Timestamp to);
 }

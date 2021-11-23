@@ -1,17 +1,15 @@
 package com.alevel.nix7.adminassistant.service;
 
-import com.alevel.nix7.adminassistant.model.admin.Admin;
 import com.alevel.nix7.adminassistant.model.admin.AdminResponse;
 import com.alevel.nix7.adminassistant.model.admin.AdminSaveRequest;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
-public interface AdminService extends UserDetailsService {
+public interface AdminService {
 
     AdminResponse create(AdminSaveRequest admin);
 
-    void update(Admin admin);
+    AdminResponse createOwner(AdminSaveRequest admin);
 
     AdminResponse getById(Long id);
 

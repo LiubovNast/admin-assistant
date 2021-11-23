@@ -24,7 +24,7 @@ public class AuthenticationController {
         this.jwtTokenService = jwtTokenService;
     }
 
-    @PostMapping()
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             content = @Content(schema = @Schema(implementation = TokenRequest.class)))
     TokenResponse login(@AuthenticationPrincipal AdminDetails userDetails) {

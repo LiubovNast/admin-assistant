@@ -1,11 +1,15 @@
 package com.alevel.nix7.adminassistant.service.impl;
 
+import com.alevel.nix7.adminassistant.model.Role;
 import com.alevel.nix7.adminassistant.model.specialist.Specialist;
+import com.alevel.nix7.adminassistant.model.specialist.SpecialistRequest;
+import com.alevel.nix7.adminassistant.model.specialist.SpecialistResponse;
 import com.alevel.nix7.adminassistant.repository.SpecialistRepository;
 import com.alevel.nix7.adminassistant.service.SpecialistService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SpecialistServiceImpl implements SpecialistService {
@@ -17,13 +21,18 @@ public class SpecialistServiceImpl implements SpecialistService {
     }
 
     @Override
-    public void create(Specialist specialist) {
-        specialistRepository.save(specialist);
+    public SpecialistResponse create(SpecialistRequest request) {
+        return SpecialistResponse.fromWorker(save(request));
     }
 
-    @Override
-    public void update(Specialist specialist) {
+    private Specialist save(SpecialistRequest request) {
+        Specialist specialist = new Specialist();
+        specialist.setFullName(request.fullName());
+        specialist.setLogin(request.login());
+        specialist.setPassword(request.password());
+        specialist.setRole(Role.ROLE_WORKER);
         specialistRepository.save(specialist);
+        return specialist;
     }
 
     @Override
@@ -32,8 +41,9 @@ public class SpecialistServiceImpl implements SpecialistService {
     }
 
     @Override
-    public List<Specialist> getAllSpecialist() {
-        return specialistRepository.findAll();
+    public List<SpecialistResponse> getAllSpecialist() {
+        return specialistRepository.findAll().stream()
+                .map(SpecialistResponse::fromWorker).collect(Collectors.toList());
     }
 
     @Override

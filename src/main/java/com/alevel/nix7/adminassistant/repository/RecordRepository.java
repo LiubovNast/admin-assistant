@@ -12,5 +12,5 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
 
     List<Record> findRecordsByUser(Long id);
 
-    List<Record> findRecordsByWhenBetween(Timestamp from, Timestamp to);
+    List<Record> findRecordsBySpecialistAndWhenBetween(Long id, Timestamp from, Timestamp to);
 }

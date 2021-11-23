@@ -2,12 +2,12 @@ package com.alevel.nix7.adminassistant.service.impl;
 
 import com.alevel.nix7.adminassistant.config.security.JwtComponent;
 import com.alevel.nix7.adminassistant.exceptions.JwtAuthenticationException;
+import com.alevel.nix7.adminassistant.model.admin.AdminDetails;
 import com.alevel.nix7.adminassistant.model.token.TokenResponse;
 import com.alevel.nix7.adminassistant.service.JwtTokenService;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -25,7 +25,7 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     }
 
     @Override
-    public TokenResponse getToken(UserDetails userDetails) {
+    public TokenResponse getToken(AdminDetails userDetails) {
         return createToken(userDetails);
     }
 
@@ -35,7 +35,7 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         validatedToken(token);
     }
 
-    private TokenResponse createToken(UserDetails userDetails) {
+    private TokenResponse createToken(AdminDetails userDetails) {
         long expIn = currentTime.getTime() + jwtComponent.getDuration();
         String token = JWT.create().withSubject(userDetails.getUsername())
                 .withIssuedAt(currentTime)

@@ -73,7 +73,9 @@ public class RecordServiceImpl implements RecordService {
     }
 
     @Override
-    public List<Record> getRecordsBetweenTime(Timestamp from, Timestamp to) {
-        return recordRepository.findRecordsByWhenBetween(from, to);
+    public List<RecordResponse> getRecordsForSpecialistBetweenTime(Long specialistId, Timestamp from, Timestamp to) {
+        return recordRepository.findRecordsBySpecialistAndWhenBetween(specialistId, from, to)
+                .stream().map(RecordResponse::fromRecord)
+                .collect(Collectors.toList());
     }
 }
