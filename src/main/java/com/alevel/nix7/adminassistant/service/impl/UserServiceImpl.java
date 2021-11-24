@@ -1,5 +1,6 @@
 package com.alevel.nix7.adminassistant.service.impl;
 
+import com.alevel.nix7.adminassistant.exceptions.AssistantException;
 import com.alevel.nix7.adminassistant.model.Role;
 import com.alevel.nix7.adminassistant.model.user.User;
 import com.alevel.nix7.adminassistant.model.user.UserRequest;
@@ -19,6 +20,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse create(UserRequest user) {
+        checkPhone(user.phone());
         return saveUser(user);
     }
 
@@ -44,5 +46,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getById(Long id) {
         return userRepository.getById(id);
+    }
+
+    private void checkPhone(String phone) {
+        if (userRepository.existsByPhone(phone)) {
+            throw AssistantException.duplicatePhone(phone);
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.alevel.nix7.adminassistant.service.impl;
 
+import com.alevel.nix7.adminassistant.exceptions.AssistantException;
 import com.alevel.nix7.adminassistant.model.Role;
 import com.alevel.nix7.adminassistant.model.admin.Admin;
 import com.alevel.nix7.adminassistant.model.admin.AdminDetails;
@@ -33,12 +34,14 @@ public class AdminServiceImpl implements AdminService, UserDetailsService {
 
     @Override
     public AdminResponse create(AdminSaveRequest admin) {
+        checkLogin(admin.login());
         LOG.info("Create new Admin {}", admin.fullName());
         return AdminResponse.fromAdmin(save(admin, Role.ROLE_ADMIN));
     }
 
     @Override
     public AdminResponse createOwner(AdminSaveRequest admin) {
+        checkLogin(admin.login());
         LOG.info("Create new Owner {}", admin.fullName());
         return AdminResponse.fromAdmin(save(admin, Role.ROLE_OWNER));
     }
@@ -50,8 +53,10 @@ public class AdminServiceImpl implements AdminService, UserDetailsService {
 
     @Override
     public AdminResponse getByLogin(String login) {
-        Admin admin = adminRepository.findAdminByLogin(login);
-        return admin == null ? null : AdminResponse.fromAdmin(admin);
+        if (adminRepository.existsByLogin(login)) {
+            return AdminResponse.fromAdmin(adminRepository.findAdminByLogin(login));
+        }
+        return null;
     }
 
     @Override
@@ -61,7 +66,7 @@ public class AdminServiceImpl implements AdminService, UserDetailsService {
 
     @Override
     public List<AdminResponse> getAllAdmins() {
-        return adminRepository.findAll().stream().map(AdminResponse::fromAdmin).collect(Collectors.toList());
+        return adminRepository.findAll().stream().map(AdminResponse::fromAdmin).toList();
     }
 
     private Admin save(AdminSaveRequest request, Role role) {
@@ -81,5 +86,11 @@ public class AdminServiceImpl implements AdminService, UserDetailsService {
             throw new UsernameNotFoundException("Admin " + login + " not found");
         }
         return new AdminDetails(admin);
+    }
+
+    private void checkLogin(String login) {
+        if (adminRepository.existsByLogin(login)) {
+            throw AssistantException.duplicateLogin(login);
+        }
     }
 }
