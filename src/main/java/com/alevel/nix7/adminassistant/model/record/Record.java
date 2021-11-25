@@ -15,10 +15,6 @@ public class Record {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "specialist_id", nullable = false)
-    private Specialist specialist;
-
     @OneToOne()
     private Procedure procedure;
 
@@ -35,14 +31,6 @@ public class Record {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Specialist getSpecialist() {
-        return specialist;
-    }
-
-    public void setSpecialist(Specialist specialist) {
-        this.specialist = specialist;
     }
 
     public Procedure getProcedure() {

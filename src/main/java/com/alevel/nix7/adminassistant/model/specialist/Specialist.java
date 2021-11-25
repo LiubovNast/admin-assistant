@@ -8,7 +8,6 @@ import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "specialists")
@@ -28,14 +27,11 @@ public class Specialist {
     @Column(nullable = false)
     private String password;
 
-    @ManyToMany(mappedBy = "specialists")
-    private Set<Procedure> procedures;
+    @OneToMany(mappedBy = "specialist")
+    private List<Procedure> procedures;
 
     @OneToMany(mappedBy = "specialist")
     private List<FreeTime> freeTimeList;
-
-    @OneToMany(mappedBy = "specialist")
-    private List<Record> records;
 
     @Column(nullable = false)
     @Enumerated(EnumType.ORDINAL)
@@ -65,11 +61,11 @@ public class Specialist {
         this.password = password;
     }
 
-    public Set<Procedure> getProcedures() {
+    public List<Procedure> getProcedures() {
         return procedures;
     }
 
-    public void setProcedures(Set<Procedure> procedures) {
+    public void setProcedures(List<Procedure> procedures) {
         this.procedures = procedures;
     }
 
@@ -79,14 +75,6 @@ public class Specialist {
 
     public void setFreeTimeList(List<FreeTime> freeTimeList) {
         this.freeTimeList = freeTimeList;
-    }
-
-    public List<Record> getRecords() {
-        return records;
-    }
-
-    public void setRecords(List<Record> records) {
-        this.records = records;
     }
 
     public Long getId() {

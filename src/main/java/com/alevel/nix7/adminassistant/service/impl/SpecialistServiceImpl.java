@@ -11,7 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class SpecialistServiceImpl implements SpecialistService {
@@ -19,7 +18,8 @@ public class SpecialistServiceImpl implements SpecialistService {
     private final SpecialistRepository specialistRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public SpecialistServiceImpl(SpecialistRepository specialistRepository, PasswordEncoder passwordEncoder) {
+    public SpecialistServiceImpl(SpecialistRepository specialistRepository,
+                                 PasswordEncoder passwordEncoder) {
         this.specialistRepository = specialistRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -48,7 +48,7 @@ public class SpecialistServiceImpl implements SpecialistService {
     @Override
     public List<SpecialistResponse> getAllSpecialist() {
         return specialistRepository.findAll().stream()
-                .map(SpecialistResponse::fromWorker).collect(Collectors.toList());
+                .map(SpecialistResponse::fromWorker).toList();
     }
 
     @Override

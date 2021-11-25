@@ -3,8 +3,6 @@ package com.alevel.nix7.adminassistant.model.procedure;
 import com.alevel.nix7.adminassistant.model.specialist.Specialist;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "procedures")
@@ -13,7 +11,7 @@ public class Procedure {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
@@ -22,12 +20,9 @@ public class Procedure {
     @Column(nullable = false)
     private Long duration;
 
-    @ManyToMany
-    @JoinTable(name = "what_and_who",
-            joinColumns = @JoinColumn(name = "procedure_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "specialist_id", referencedColumnName = "id")
-    )
-    private Set<Specialist> specialists = new HashSet<>();
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "specialist_id", nullable = false)
+    private Specialist specialist;
 
     public String getName() {
         return name;
@@ -53,12 +48,12 @@ public class Procedure {
         this.duration = duration;
     }
 
-    public Set<Specialist> getSpecialists() {
-        return specialists;
+    public Specialist getSpecialist() {
+        return specialist;
     }
 
-    public void setSpecialists(Set<Specialist> specialists) {
-        this.specialists = specialists;
+    public void setSpecialist(Specialist specialist) {
+        this.specialist = specialist;
     }
 
     public Long getId() {

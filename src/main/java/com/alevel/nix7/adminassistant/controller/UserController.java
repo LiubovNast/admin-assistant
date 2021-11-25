@@ -1,8 +1,8 @@
 package com.alevel.nix7.adminassistant.controller;
 
 import com.alevel.nix7.adminassistant.RootPath;
-import com.alevel.nix7.adminassistant.model.record.Record;
 import com.alevel.nix7.adminassistant.model.record.RecordRequest;
+import com.alevel.nix7.adminassistant.model.record.RecordResponse;
 import com.alevel.nix7.adminassistant.model.user.UserRequest;
 import com.alevel.nix7.adminassistant.model.user.UserResponse;
 import com.alevel.nix7.adminassistant.service.RecordService;
@@ -25,21 +25,11 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/{id}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public void recordForProcedure(@PathVariable long id, @RequestBody @Valid RecordRequest request) {
-        recordService.create(request, id);
-    }
-
+    //user
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse createUser(@RequestBody @Valid UserRequest request) {
         return userService.create(request);
-    }
-
-    @GetMapping("/{id}")
-    public List<Record> recordsForUser(@PathVariable long id) {
-        return recordService.getRecordsByUser(id);
     }
 
     @GetMapping()
@@ -51,6 +41,18 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUserById(@PathVariable long id) {
         userService.delete(id);
+    }
+
+    //records
+    @PostMapping("/{id}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void recordForProcedure(@PathVariable long id, @RequestBody @Valid RecordRequest request) {
+        recordService.create(request, id);
+    }
+
+    @GetMapping("/{id}")
+    public List<RecordResponse> recordsForUser(@PathVariable long id) {
+        return recordService.getRecordsByUser(id);
     }
 
     @DeleteMapping("/records/{idRecord}")

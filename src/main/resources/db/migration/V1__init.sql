@@ -43,32 +43,25 @@ CREATE TABLE specialists
 
 CREATE TABLE procedures
 (
-    id       serial primary key,
-    name     text   not null unique,
-    price    bigint not null,
-    duration bigint not null
-);
-
-create table what_and_who
-(
-    specialist_id      bigint not null references specialists (id) on delete cascade,
-    procedure_id bigint    not null references procedures (id) on delete cascade,
-    primary key (specialist_id, procedure_id)
+    id            serial primary key,
+    name          text   not null,
+    specialist_id bigint references specialists (id) on delete cascade,
+    price         bigint not null,
+    duration      bigint not null
 );
 
 CREATE TABLE records
 (
     id            serial primary key,
-    specialist_id bigint references specialists (id),
     procedure_id  bigint references procedures (id),
     time_when     timestamp not null,
-    user_id       bigint references users (id)
+    user_id       bigint references users (id) on delete cascade
 );
 
 CREATE TABLE free_time
 (
     id            serial primary key,
-    specialist_id bigint references specialists (id),
+    specialist_id bigint references specialists (id) on delete cascade,
     time_from     timestamp not null,
     time_to       timestamp not null
 );

@@ -20,4 +20,20 @@ public class AssistantException {
     public static ResponseStatusException duplicatePhone(String phone) {
         return new ResponseStatusException(HttpStatus.BAD_REQUEST, "User with phone " + phone + " already exists");
     }
+
+    public static ResponseStatusException freeTimeNotFound(String name) {
+        return new ResponseStatusException(HttpStatus.NOT_FOUND, "Specialist " + name + " doesn't have free time for this");
+    }
+
+    public static ResponseStatusException adminNotFound(long id) {
+        return new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin " + id + " not found");
+    }
+
+    public static ResponseStatusException workerNotFound(long id) {
+        return new ResponseStatusException(HttpStatus.NOT_FOUND, "Specialist " + id + " not found");
+    }
+
+    public static ResponseStatusException userNotFound(long id) {
+        return new ResponseStatusException(HttpStatus.NOT_FOUND, "User " + id + " not found");
+    }
 }

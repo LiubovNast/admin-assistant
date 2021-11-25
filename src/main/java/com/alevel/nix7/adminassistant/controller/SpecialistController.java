@@ -3,11 +3,15 @@ package com.alevel.nix7.adminassistant.controller;
 import com.alevel.nix7.adminassistant.RootPath;
 import com.alevel.nix7.adminassistant.model.freetime.FreeTimeRequest;
 import com.alevel.nix7.adminassistant.model.freetime.FreeTimeResponse;
+import com.alevel.nix7.adminassistant.model.procedure.ProcedureRequest;
 import com.alevel.nix7.adminassistant.model.procedure.ProcedureResponse;
 import com.alevel.nix7.adminassistant.model.record.RecordResponse;
 import com.alevel.nix7.adminassistant.model.specialist.SpecialistRequest;
 import com.alevel.nix7.adminassistant.model.specialist.SpecialistResponse;
-import com.alevel.nix7.adminassistant.service.*;
+import com.alevel.nix7.adminassistant.service.FreeTimeService;
+import com.alevel.nix7.adminassistant.service.ProcedureService;
+import com.alevel.nix7.adminassistant.service.RecordService;
+import com.alevel.nix7.adminassistant.service.SpecialistService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,32 +22,26 @@ import java.util.List;
 @RequestMapping(RootPath.WORKER)
 public class SpecialistController {
 
-    private final UserService userService;
     private final SpecialistService specialistService;
     private final RecordService recordService;
     private final ProcedureService procedureService;
     private final FreeTimeService freeTimeService;
 
-    public SpecialistController(UserService userService, SpecialistService specialistService,
-                                RecordService recordService, ProcedureService procedureService,
+    public SpecialistController(SpecialistService specialistService,
+                                RecordService recordService,
+                                ProcedureService procedureService,
                                 FreeTimeService freeTimeService) {
-        this.userService = userService;
         this.specialistService = specialistService;
         this.recordService = recordService;
         this.procedureService = procedureService;
         this.freeTimeService = freeTimeService;
     }
 
+    //Specialist
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public SpecialistResponse registerWorker(@RequestBody @Valid SpecialistRequest request) {
         return specialistService.create(request);
-    }
-
-    @PostMapping("/{id}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public FreeTimeResponse addFreeTime(@PathVariable long id, @RequestBody @Valid FreeTimeRequest request) {
-        return freeTimeService.create(request, id);
     }
 
     @GetMapping
@@ -57,14 +55,25 @@ public class SpecialistController {
         specialistService.delete(id);
     }
 
+    //Procedure
+    @PostMapping("/procedures/{id}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ProcedureResponse addProcedure(@RequestBody @Valid ProcedureRequest request, @PathVariable long id) {
+        return procedureService.create(request, id);
+    }
+
     @GetMapping("/procedures/{id}")
     public List<ProcedureResponse> allProcedures(@PathVariable long id) {
         return procedureService.findAllBySpecialist(id);
     }
 
-    @GetMapping("/records/{id}")
-    public List<RecordResponse> allRecords(@PathVariable long id) {
-        return recordService.getRecordsBySpecialist(id);
+    //Records
+
+    //FreeTime
+    @PostMapping("/{id}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public FreeTimeResponse addFreeTime(@PathVariable long id, @RequestBody @Valid FreeTimeRequest request) {
+        return freeTimeService.create(request, id);
     }
 
     @GetMapping("/work_time/{id}")
