@@ -10,8 +10,6 @@ public interface SpecialistService {
 
     SpecialistResponse create(SpecialistRequest specialist);
 
-    Specialist getSpecialistById(Long id);
-
     List<SpecialistResponse> getAllSpecialist();
 
     void delete(Long id);

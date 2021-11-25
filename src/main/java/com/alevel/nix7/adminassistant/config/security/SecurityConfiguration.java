@@ -3,17 +3,13 @@ package com.alevel.nix7.adminassistant.config.security;
 import com.alevel.nix7.adminassistant.RootPath;
 import com.alevel.nix7.adminassistant.config.security.filter.JwtAuthenticationFilter;
 import com.alevel.nix7.adminassistant.config.security.filter.JwtAuthorizationFilter;
-import com.alevel.nix7.adminassistant.model.Role;
 import com.alevel.nix7.adminassistant.model.admin.AdminSaveRequest;
-import com.alevel.nix7.adminassistant.service.AdminService;
 import com.alevel.nix7.adminassistant.service.impl.AdminServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -79,7 +75,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 //
 //                .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole(OWNER)
 
-               // .anyRequest().authenticated()
+                // .anyRequest().authenticated()
                 .and()
 //                .addFilter(jwtAuthenticationFilter())
 //                .addFilter(jwtAuthorizationFilter())
@@ -107,12 +103,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     private void setupDefaultAdmin() {
-        if (adminService.getByLogin("owner") == null) {
-            adminService.createOwner(new AdminSaveRequest("Main Owner",
-                    passwordEncoder.encode("owner"),
-                    "owner"));
-            LOG.info("Create default owner");
-        }
+        adminService.createOwner(new AdminSaveRequest("Main Owner",
+                passwordEncoder.encode("owner"),
+                "owner"));
+        LOG.info("Create default owner");
     }
 
     private CorsConfigurationSource corsConfigurationSource() {

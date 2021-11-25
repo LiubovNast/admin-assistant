@@ -17,8 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -118,20 +116,19 @@ class AdminAssistantApplicationTests {
 
     @Test
     void testCreateUser() {
-        String phone = "0991234567";
-        String fullName = "User Name";
+        var phone = "0991234567";
+        var fullName = "User Name";
 
         ResponseEntity<UserResponse> responseEntity = createUser(fullName, phone);
         assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
         assertEquals(MediaType.APPLICATION_JSON, responseEntity.getHeaders().getContentType());
 
-        UserResponse responseBody = responseEntity.getBody();
+        var responseBody = responseEntity.getBody();
         assertNotNull(responseBody);
         assertEquals(phone, responseBody.phone());
         assertEquals(fullName, responseBody.fullName());
         assertNotEquals(0, responseBody.id());
     }
-
 
     private ResponseEntity<AdminResponse> createAdmin(String fullName, String password, String login) {
         var url = getUrlAdmin();

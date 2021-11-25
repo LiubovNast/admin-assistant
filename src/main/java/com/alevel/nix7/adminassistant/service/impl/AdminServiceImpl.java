@@ -3,9 +3,9 @@ package com.alevel.nix7.adminassistant.service.impl;
 import com.alevel.nix7.adminassistant.exceptions.AssistantException;
 import com.alevel.nix7.adminassistant.model.Role;
 import com.alevel.nix7.adminassistant.model.admin.Admin;
-import com.alevel.nix7.adminassistant.model.admin.AdminDetails;
 import com.alevel.nix7.adminassistant.model.admin.AdminResponse;
 import com.alevel.nix7.adminassistant.model.admin.AdminSaveRequest;
+import com.alevel.nix7.adminassistant.model.details.AdminDetails;
 import com.alevel.nix7.adminassistant.repository.AdminRepository;
 import com.alevel.nix7.adminassistant.service.AdminService;
 import org.slf4j.Logger;
@@ -17,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class AdminServiceImpl implements AdminService, UserDetailsService {
@@ -48,19 +47,22 @@ public class AdminServiceImpl implements AdminService, UserDetailsService {
 
     @Override
     public AdminResponse getById(Long id) {
-        return AdminResponse.fromAdmin(adminRepository.findById(id).orElseThrow());
+        return AdminResponse.fromAdmin(adminRepository.findById(id)
+                .orElseThrow(() -> AssistantException.adminNotFound(id)));
     }
 
     @Override
     public AdminResponse getByLogin(String login) {
-        if (adminRepository.existsByLogin(login)) {
-            return AdminResponse.fromAdmin(adminRepository.findAdminByLogin(login));
-        }
-        return null;
+        return AdminResponse.fromAdmin(adminRepository.findAdminByLogin(login)
+                .orElseThrow(() -> AssistantException.adminNotFound(login)));
     }
 
     @Override
     public void delete(Long id) {
+        if (!adminRepository.existsById(id)) {
+            throw AssistantException.adminNotFound(id);
+        }
+        LOG.warn("Deleted admin {}", id);
         adminRepository.deleteById(id);
     }
 
@@ -81,10 +83,8 @@ public class AdminServiceImpl implements AdminService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
-        Admin admin = adminRepository.findAdminByLogin(login);
-        if (admin == null) {
-            throw new UsernameNotFoundException("Admin " + login + " not found");
-        }
+        var admin = adminRepository.findAdminByLogin(login)
+                .orElseThrow(() -> new UsernameNotFoundException("Admin " + login + " not found"));
         return new AdminDetails(admin);
     }
 

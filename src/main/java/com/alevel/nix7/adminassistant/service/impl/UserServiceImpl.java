@@ -24,6 +24,26 @@ public class UserServiceImpl implements UserService {
         return saveUser(user);
     }
 
+    @Override
+    public void delete(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw AssistantException.userNotFound(id);
+        }
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public UserResponse getByPhone(String phone) {
+        return UserResponse.fromUser(userRepository.findByPhone(phone)
+                .orElseThrow(() -> AssistantException.userNotFound(phone)));
+    }
+
+    @Override
+    public UserResponse getById(Long id) {
+        return UserResponse.fromUser(userRepository.findById(id)
+                .orElseThrow(() -> AssistantException.userNotFound(id)));
+    }
+
     private UserResponse saveUser(UserRequest user) {
         User newUser = new User();
         newUser.setFullName(user.fullName());
@@ -33,22 +53,15 @@ public class UserServiceImpl implements UserService {
         return UserResponse.fromUser(newUser);
     }
 
-    @Override
-    public void delete(Long id) {
-        userRepository.deleteById(id);
-    }
-
-    @Override
-    public User getByPhone(String phone) {
-        return userRepository.findByPhone(phone);
-    }
-
-    @Override
-    public User getById(Long id) {
-        return userRepository.getById(id);
-    }
-
     private void checkPhone(String phone) {
+        if ((phone.startsWith("+380") && phone.length() == 13)
+                || (phone.startsWith("0") && phone.length() == 10)) {
+            if (!phone.matches("\\+?\\d{10,12}")) {
+                throw AssistantException.invalidPhone(phone);
+            }
+        } else {
+            throw AssistantException.invalidPhone(phone);
+        }
         if (userRepository.existsByPhone(phone)) {
             throw AssistantException.duplicatePhone(phone);
         }

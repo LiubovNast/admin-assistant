@@ -1,5 +1,6 @@
-package com.alevel.nix7.adminassistant.model.admin;
+package com.alevel.nix7.adminassistant.model.details;
 
+import com.alevel.nix7.adminassistant.model.admin.Admin;
 import org.springframework.security.core.userdetails.User;
 
 import java.util.EnumSet;

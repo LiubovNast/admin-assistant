@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ProcedureService {
 
-    ProcedureResponse create(ProcedureRequest procedure, Long SpecialistId);
+    ProcedureResponse create(ProcedureRequest procedure, Long idSpecialist);
 
     void delete(Long id);
 

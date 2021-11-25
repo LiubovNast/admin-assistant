@@ -12,13 +12,13 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class FreeTimeServiceImpl implements FreeTimeService {
 
     private final FreeTimeRepository freeTimeRepository;
     private final SpecialistRepository specialistRepository;
+    private static final long MINUTE = 60_000;
 
     public FreeTimeServiceImpl(FreeTimeRepository freeTimeRepository, SpecialistRepository specialistRepository) {
         this.freeTimeRepository = freeTimeRepository;
@@ -27,12 +27,45 @@ public class FreeTimeServiceImpl implements FreeTimeService {
 
     @Override
     public FreeTimeResponse create(FreeTimeRequest request, Long specialistId) {
+        checkTime(request);
         return FreeTimeResponse.fromTime(save(request, specialistId));
+    }
+
+    @Override
+    public void delete(Long id) {
+        if (!freeTimeRepository.existsById(id)) {
+            throw AssistantException.freeTimeNotFound(id);
+        }
+        freeTimeRepository.deleteById(id);
+    }
+
+    @Override
+    public FreeTimeResponse getById(Long id) {
+        return FreeTimeResponse.fromTime(freeTimeRepository.findById(id)
+                .orElseThrow(() -> AssistantException.freeTimeNotFound(id)));
+    }
+
+    @Override
+    public List<FreeTimeResponse> getAllFreeTimeSpecialist(Long id) {
+        return freeTimeRepository.findAllBySpecialist(specialistRepository.findById(id)
+                        .orElseThrow(() -> AssistantException.workerNotFound(id)))
+                .stream().map(FreeTimeResponse::fromTime)
+                .toList();
+    }
+
+    @Override
+    public FreeTimeResponse getFreeTimeForRecord(Specialist specialist, Timestamp start, long duration) {
+        var finish = new Timestamp(start.getTime() + duration * MINUTE);
+        var freeTime = freeTimeRepository
+                .findBySpecialistAndFromBeforeAndToAfter(specialist, start, finish)
+                .orElseThrow(() -> AssistantException.freeTimeNotFound(specialist.getFullName()));
+        return FreeTimeResponse.fromTime(freeTime);
     }
 
     private FreeTime save(FreeTimeRequest request, Long specialistId) {
         var freeTime = new FreeTime();
-        var specialist = specialistRepository.getById(specialistId);
+        var specialist = specialistRepository.findById(specialistId)
+                .orElseThrow(() -> AssistantException.workerNotFound(specialistId));
         freeTime.setFrom(request.from());
         freeTime.setTo(request.to());
         freeTime.setSpecialist(specialist);
@@ -40,30 +73,9 @@ public class FreeTimeServiceImpl implements FreeTimeService {
         return freeTime;
     }
 
-    @Override
-    public void delete(Long id) {
-        freeTimeRepository.deleteById(id);
-    }
-
-    @Override
-    public FreeTimeResponse getById(Long id) {
-        return FreeTimeResponse.fromTime(freeTimeRepository.getById(id));
-    }
-
-    @Override
-    public List<FreeTimeResponse> getAllFreeTimeSpecialist(Long id) {
-        return freeTimeRepository.findAllBySpecialist(specialistRepository.getById(id))
-                .stream().map(FreeTimeResponse::fromTime)
-                .toList();
-    }
-
-    @Override
-    public FreeTimeResponse getFreeTimeForRecord(Specialist specialist, Timestamp start, long duration) {
-        var finish = new Timestamp(start.getTime() + duration);
-        var freeTime = freeTimeRepository.findBySpecialistAndFromBeforeAndToAfter(specialist, start, finish);
-        if (freeTime == null) {
-            throw AssistantException.freeTimeNotFound(specialist.getFullName());
+    private void checkTime(FreeTimeRequest request) {
+        if (request.from().after(request.to())) {
+            throw AssistantException.invalidTime();
         }
-        return FreeTimeResponse.fromTime(freeTime);
     }
 }

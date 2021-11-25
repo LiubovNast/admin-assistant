@@ -34,7 +34,7 @@ public class UserController {
 
     @GetMapping()
     public UserResponse user(@RequestBody String phone) {
-        return UserResponse.fromUser(userService.getByPhone(phone));
+        return userService.getByPhone(phone);
     }
 
     @DeleteMapping("/{id}")

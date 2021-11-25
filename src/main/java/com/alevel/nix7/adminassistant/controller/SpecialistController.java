@@ -5,12 +5,10 @@ import com.alevel.nix7.adminassistant.model.freetime.FreeTimeRequest;
 import com.alevel.nix7.adminassistant.model.freetime.FreeTimeResponse;
 import com.alevel.nix7.adminassistant.model.procedure.ProcedureRequest;
 import com.alevel.nix7.adminassistant.model.procedure.ProcedureResponse;
-import com.alevel.nix7.adminassistant.model.record.RecordResponse;
 import com.alevel.nix7.adminassistant.model.specialist.SpecialistRequest;
 import com.alevel.nix7.adminassistant.model.specialist.SpecialistResponse;
 import com.alevel.nix7.adminassistant.service.FreeTimeService;
 import com.alevel.nix7.adminassistant.service.ProcedureService;
-import com.alevel.nix7.adminassistant.service.RecordService;
 import com.alevel.nix7.adminassistant.service.SpecialistService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -23,16 +21,13 @@ import java.util.List;
 public class SpecialistController {
 
     private final SpecialistService specialistService;
-    private final RecordService recordService;
     private final ProcedureService procedureService;
     private final FreeTimeService freeTimeService;
 
     public SpecialistController(SpecialistService specialistService,
-                                RecordService recordService,
                                 ProcedureService procedureService,
                                 FreeTimeService freeTimeService) {
         this.specialistService = specialistService;
-        this.recordService = recordService;
         this.procedureService = procedureService;
         this.freeTimeService = freeTimeService;
     }
@@ -66,8 +61,6 @@ public class SpecialistController {
     public List<ProcedureResponse> allProcedures(@PathVariable long id) {
         return procedureService.findAllBySpecialist(id);
     }
-
-    //Records
 
     //FreeTime
     @PostMapping("/{id}")

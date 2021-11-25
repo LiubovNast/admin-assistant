@@ -30,21 +30,6 @@ public class SpecialistServiceImpl implements SpecialistService {
         return SpecialistResponse.fromWorker(save(request));
     }
 
-    private Specialist save(SpecialistRequest request) {
-        Specialist specialist = new Specialist();
-        specialist.setFullName(request.fullName());
-        specialist.setLogin(request.login());
-        specialist.setPassword(passwordEncoder.encode(request.password()));
-        specialist.setRole(Role.ROLE_WORKER);
-        specialistRepository.save(specialist);
-        return specialist;
-    }
-
-    @Override
-    public Specialist getSpecialistById(Long id) {
-        return specialistRepository.getById(id);
-    }
-
     @Override
     public List<SpecialistResponse> getAllSpecialist() {
         return specialistRepository.findAll().stream()
@@ -53,7 +38,20 @@ public class SpecialistServiceImpl implements SpecialistService {
 
     @Override
     public void delete(Long id) {
+        if (!specialistRepository.existsById(id)) {
+            throw AssistantException.workerNotFound(id);
+        }
         specialistRepository.deleteById(id);
+    }
+
+    private Specialist save(SpecialistRequest request) {
+        Specialist specialist = new Specialist();
+        specialist.setFullName(request.fullName());
+        specialist.setLogin(request.login());
+        specialist.setPassword(passwordEncoder.encode(request.password()));
+        specialist.setRole(Role.ROLE_WORKER);
+        specialistRepository.save(specialist);
+        return specialist;
     }
 
     private void checkLogin(String login) {

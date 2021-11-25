@@ -3,7 +3,7 @@ package com.alevel.nix7.adminassistant.controller;
 import com.alevel.nix7.adminassistant.RootPath;
 import com.alevel.nix7.adminassistant.exceptions.AssistantException;
 import com.alevel.nix7.adminassistant.exceptions.JwtAuthenticationException;
-import com.alevel.nix7.adminassistant.model.admin.AdminDetails;
+import com.alevel.nix7.adminassistant.model.details.AdminDetails;
 import com.alevel.nix7.adminassistant.model.token.TokenRequest;
 import com.alevel.nix7.adminassistant.model.token.TokenResponse;
 import com.alevel.nix7.adminassistant.service.JwtTokenService;
