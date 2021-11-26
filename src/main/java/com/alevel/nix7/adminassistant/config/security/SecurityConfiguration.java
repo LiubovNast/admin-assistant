@@ -4,6 +4,7 @@ import com.alevel.nix7.adminassistant.RootPath;
 import com.alevel.nix7.adminassistant.config.security.filter.JwtAuthenticationFilter;
 import com.alevel.nix7.adminassistant.config.security.filter.JwtAuthorizationFilter;
 import com.alevel.nix7.adminassistant.model.admin.AdminSaveRequest;
+import com.alevel.nix7.adminassistant.repository.AdminRepository;
 import com.alevel.nix7.adminassistant.service.impl.AdminServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -31,17 +32,20 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private static final Logger LOG = LoggerFactory.getLogger(SecurityConfiguration.class);
 
-    private final String OWNER = "OWNER";
-
     private final AdminServiceImpl adminService;
+    private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtComponent jwtComponent;
     private final ObjectMapper objectMapper;
 
 
-    public SecurityConfiguration(AdminServiceImpl adminService, PasswordEncoder passwordEncoder,
-                                 JwtComponent jwtComponent, ObjectMapper objectMapper) {
+    public SecurityConfiguration(AdminServiceImpl adminService,
+                                 AdminRepository adminRepository,
+                                 PasswordEncoder passwordEncoder,
+                                 JwtComponent jwtComponent,
+                                 ObjectMapper objectMapper) {
         this.adminService = adminService;
+        this.adminRepository = adminRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtComponent = jwtComponent;
         this.objectMapper = objectMapper;
@@ -55,30 +59,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                // open static resources
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 // open swagger-ui
                 .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .antMatchers(RootPath.ROOT, RootPath.ROOT + "/**").permitAll()
-                //.antMatchers(HttpMethod.POST, RootPath.ROOT).permitAll()
-
-//                .antMatchers(HttpMethod.POST, RootPath.WORKER, RootPath.WORKER + "/**").hasAnyRole("ADMIN", "OWNER", "WORKER")
-//                .antMatchers(HttpMethod.GET, RootPath.WORKER, RootPath.WORKER + "/**").hasAnyRole("ADMIN", "OWNER", "WORKER")
-//                .antMatchers(HttpMethod.DELETE, RootPath.WORKER).hasAnyRole("ADMIN", "OWNER")
-//
-//                .antMatchers(HttpMethod.POST, RootPath.ADMIN).hasRole(OWNER)
-//                .antMatchers(HttpMethod.DELETE, RootPath.ADMIN).hasRole(OWNER)
-//                .antMatchers(HttpMethod.GET, RootPath.ADMIN).hasAnyRole(OWNER, "ADMIN")
-//
-//                .antMatchers(HttpMethod.GET, RootPath.USER).authenticated()
-//                .antMatchers(HttpMethod.POST, RootPath.USER).authenticated()
-//
-//                .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole(OWNER)
-
-                // .anyRequest().authenticated()
                 .and()
-//                .addFilter(jwtAuthenticationFilter())
-//                .addFilter(jwtAuthorizationFilter())
                 .exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 .and()
                 .cors().configurationSource(corsConfigurationSource())
@@ -103,10 +88,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     private void setupDefaultAdmin() {
-        adminService.createOwner(new AdminSaveRequest("Main Owner",
-                passwordEncoder.encode("owner"),
-                "owner"));
-        LOG.info("Create default owner");
+        if (!adminRepository.existsByLogin("owner")) {
+            adminService.createOwner(new AdminSaveRequest("Main Owner",
+                    passwordEncoder.encode("owner"),
+                    "owner"));
+            LOG.info("Create default owner");
+        }
     }
 
     private CorsConfigurationSource corsConfigurationSource() {
